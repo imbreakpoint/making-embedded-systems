@@ -1,4 +1,4 @@
-** Blinky **
+**Blinky**<br>
 What build environment are you using? VSCode with Platformio
 
 What are the hardware registers that cause the LED to turn on and off?
@@ -11,4 +11,4 @@ Can you read the register directly and see the button change in a debugger or by
 printing out the value of the memory at the register’s address?
 - I used a scope to see what is going on the button pin.
 Scope capture here-
-![scope-capture](https://github.com/imbreakpoint/making-embedded-systems/blob/main/week3/btn.jpeg?raw=true)
+![scope-capture](https://github.com/imbreakpoint/making-embedded-systems/blob/main/week3/btn.jpg?raw=true)
