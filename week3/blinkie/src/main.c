@@ -6,9 +6,10 @@
 */
 #include "stm32f4xx_hal.h"
 
-#include "timer.h"
-#include "led.h"
 #include "blinkie.h"
+#include "button.h"
+#include "led.h"
+#include "timer.h"
 
 static void GPIOinit(void);
 
@@ -20,20 +21,22 @@ int main(void)
   	GPIOinit();
 	TMRinit();
 
+	BLINKIEstart();
+
 	// main application code
-	BLINKIEcontrol();
 	while (1)
 	{
-		// Nothing here right now
+		BLINKIEcontrol();
 	}
 }
 
 static void GPIOinit(void)
 {
 	// i/o port setup
-    __HAL_RCC_GPIOG_CLK_ENABLE();
     LEDinit(LED_RED);
     LEDinit(LED_GREEN);
+
+	BTNinit(BTN_USER);
 }
 
 void SysTick_Handler(void)

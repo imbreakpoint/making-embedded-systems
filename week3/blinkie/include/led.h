@@ -9,10 +9,13 @@ typedef struct
     uint16_t pin;
 } LED;
 
-LED LED_RED;
-LED LED_GREEN;
+const LED LED_RED;
+const LED LED_GREEN;
+
+#define LEDtoggle(led) (HAL_GPIO_TogglePin(led.port, led.pin))
+#define LEDon(led) (HAL_GPIO_WritePin(led.port, led.pin, GPIO_PIN_SET))
+#define LEDoff(led) (HAL_GPIO_WritePin(led.port, led.pin, GPIO_PIN_RESET))
 
 void LEDinit(LED led);
-void LEDtoggle(LED led);
 
 #endif
