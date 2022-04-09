@@ -42,7 +42,7 @@ void BLINKIEcontrol(void)
     static bool isBlinkieOn = true;
     if (blinkieBtnEvt)
     {
-	    isBlinkieOn ? BLINKIEstop() : BLINKIEstart();
+	isBlinkieOn ? BLINKIEstop() : BLINKIEstart();
         isBlinkieOn = !isBlinkieOn;
         blinkieBtnEvt = false;
     }
