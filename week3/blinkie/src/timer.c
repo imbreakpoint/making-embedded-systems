@@ -12,7 +12,7 @@ void TIM1_UP_TIM10_IRQHandler()
 
 void TMRinit(void)
 {
-	// PS = 8000, Period = 500, gives about, 16e6 / ((8000-1) * (500-1)) = 4.0085Hz
+	// PS = 8000, Period = 500, gives about, 16e6 / ((8000-1) * (500-1)) = 4.5Hz
 	blinkTimer.Instance = TIM1;
 	__TIM1_CLK_ENABLE();
 	blinkTimer.Init.Prescaler = 8000;
