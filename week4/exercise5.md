@@ -6,4 +6,4 @@ For debugging and/or an alternative to physically rotating I plan to make serial
 I want to integrate the display if at all possible and provide other typical game configuration options - but will be my last thing to implement depending on how busy work keeps me in and around the project completion dates.
 
 Here is a first pass at the state chart-
-![state-chart](https://github.com/imbreakpoint/making-embedded-systems/blob/main/week4/final_project_state_chart.png?raw=true)
+![state-chart](https://github.com/imbreakpoint/making-embedded-systems/blob/main/week4/final_project_state_chart.PNG?raw=true)
