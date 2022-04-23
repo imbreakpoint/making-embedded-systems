@@ -3,6 +3,7 @@ Not rotating or, rotating in the wrong direction or, missing the deadline within
 
 I plan to use gyro to determine rotation direction. I will use a button to start/restart the game.
 For debugging and/or an alternative to physically rotating I plan to make serial commands available which can also be used simultaneously.
+I also want to add sound while the game is in progress. And ofcourse calibration for the gyro but still working through those details yet.
 I want to integrate the display if at all possible and provide other typical game configuration options - but will be my last thing to implement depending on how busy work keeps me in and around the project completion dates.
 
 Here is a first pass at the state chart-
