@@ -21,7 +21,7 @@ Flash: 556 bytes used
 <br/>
 
 Here is a short comparison-<br/>
-![algo-comparison](https://github.com/imbreakpoint/making-embedded-systems/blob/main/week9/ex9_comparison.png?raw=true)	
+![algo-comparison](https://github.com/imbreakpoint/making-embedded-systems/blob/main/week9/ex9_comparison.PNG?raw=true)	
 
 <br/><br/>
 A few conclusions-<br/>
