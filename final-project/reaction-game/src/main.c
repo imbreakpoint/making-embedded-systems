@@ -7,6 +7,7 @@
 #include "button.h"
 #include "game.h"
 #include "led.h"
+#include "temperature.h"
 #include "timer.h"
 #include "uart.h"
 
@@ -29,8 +30,9 @@ int main(void)
 
   	UARTreceiveByte();
 
-	ConsoleInit();
+	TEMPinit();  
 
+	ConsoleInit();
 	GAMEinit();
 
 	while (1)

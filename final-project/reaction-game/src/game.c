@@ -1,6 +1,7 @@
 #include "button.h"
 #include "game.h"
 #include "led.h"
+#include "temperature.h"
 #include "timer.h"
 
 #define LED_CW     	LED_GREEN
@@ -13,7 +14,17 @@ static GSTATE gameChooseRotation();
 static GSTATE gameChooseRotation()
 {
 	GSTATE directionState = GSTATE_SETUP_CW;
-	// TODO add direction select logic here
+	// TODO enhance this direction select logic - do something w/ raw values?
+	static float prevTemp = 0.0;
+	float temp = 0.0;
+	TEMPread(&temp);
+	if (temp > prevTemp)
+	{
+		directionState = GSTATE_SETUP_ACW;
+	}
+
+	prevTemp = temp;
+
 	return directionState;
 }
 
