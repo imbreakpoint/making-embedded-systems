@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "reaction-game",
+			"path": "final-project\\reaction-game"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"stm32f4xx_hal.h": "c",
+			"timer.h": "c",
+			"i3g4250d.h": "c",
+			"gyro.h": "c",
+			"adc.h": "c"
+		}
+	}
+}

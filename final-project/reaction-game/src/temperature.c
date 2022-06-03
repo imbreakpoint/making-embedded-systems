@@ -1,61 +1,84 @@
+/* Includes ------------------------------------------------------------------*/
 #include "temperature.h"
 
-static ADC_HandleTypeDef AdcHandle;
-static ADC_ChannelConfTypeDef AdcChannel;
+/* Global Definitions --------------------------------------------------------*/
+/* Local Definitions ---------------------------------------------------------*/
 
+/**
+  * @brief  ADC Handle
+*/
+static ADC_HandleTypeDef tempAdcHandle;
+
+/**
+  * @brief  ADC Channel Handle
+*/
+static ADC_ChannelConfTypeDef tempAdcChannel;
+
+/* Local Functions -----------------------------------------------------------*/
+/* Interrupt Handles ---------------------------------------------------------*/
+/* Global Functions ----------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Initializes temperature sensor / ADC
+*/
 void TEMPinit(void)
 {
-	AdcHandle.Instance = ADC1;
+	tempAdcHandle.Instance = ADC1;
 
-	HAL_ADC_DeInit(&AdcHandle);
+	HAL_ADC_DeInit(&tempAdcHandle);
 
-	if (HAL_ADC_STATE_RESET == HAL_ADC_GetState(&AdcHandle))
+	if (HAL_ADC_STATE_RESET == HAL_ADC_GetState(&tempAdcHandle))
 	{
 		__HAL_RCC_ADC1_CLK_ENABLE();
     
-		AdcHandle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
-		AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
-		AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-		AdcHandle.Init.ScanConvMode = DISABLE;
-		AdcHandle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-		AdcHandle.Init.ContinuousConvMode = ENABLE;
-		AdcHandle.Init.NbrOfConversion = 1;
-		AdcHandle.Init.DiscontinuousConvMode = DISABLE;
-		AdcHandle.Init.NbrOfDiscConversion = 1;
-		AdcHandle.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_CC1;
-		AdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-		AdcHandle.Init.DMAContinuousRequests = DISABLE;
+		tempAdcHandle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+		tempAdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
+		tempAdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+		tempAdcHandle.Init.ScanConvMode = DISABLE;
+		tempAdcHandle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+		tempAdcHandle.Init.ContinuousConvMode = ENABLE;
+		tempAdcHandle.Init.NbrOfConversion = 1;
+		tempAdcHandle.Init.DiscontinuousConvMode = DISABLE;
+		tempAdcHandle.Init.NbrOfDiscConversion = 1;
+		tempAdcHandle.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_CC1;
+		tempAdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+		tempAdcHandle.Init.DMAContinuousRequests = DISABLE;
 
-		HAL_ADC_Init(&AdcHandle);
+		HAL_ADC_Init(&tempAdcHandle);
 
-		AdcChannel.Channel = ADC_CHANNEL_TEMPSENSOR;
-		AdcChannel.SamplingTime = ADC_SAMPLETIME_480CYCLES;
-		AdcChannel.Rank = 1;
-		AdcChannel.Offset = 0;
+		tempAdcChannel.Channel = ADC_CHANNEL_TEMPSENSOR;
+		tempAdcChannel.SamplingTime = ADC_SAMPLETIME_480CYCLES;
+		tempAdcChannel.Rank = 1;
+		tempAdcChannel.Offset = 0;
 
-		HAL_ADC_ConfigChannel(&AdcHandle, &AdcChannel);
+		HAL_ADC_ConfigChannel(&tempAdcHandle, &tempAdcChannel);
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Reads the value of temperature sensor
+*/
 __attribute__((optimize(0)))
 HAL_StatusTypeDef TEMPread(float* temperature)
 {
-	if (HAL_OK != HAL_ADC_Start(&AdcHandle))
+	if (HAL_OK != HAL_ADC_Start(&tempAdcHandle))
 	{
 		return HAL_ERROR;
 	}
 
-	if (HAL_OK != HAL_ADC_PollForConversion(&AdcHandle, HAL_MAX_DELAY))
+	if (HAL_OK != HAL_ADC_PollForConversion(&tempAdcHandle, HAL_MAX_DELAY))
 	{
 		return HAL_ERROR;
 	}
 
-	if (HAL_ADC_STATE_REG_EOC != (HAL_ADC_GetState(&AdcHandle) & HAL_ADC_STATE_REG_EOC))
+	if (HAL_ADC_STATE_REG_EOC != (HAL_ADC_GetState(&tempAdcHandle) & HAL_ADC_STATE_REG_EOC))
 	{
 		return HAL_ERROR;
 	}
 
-	volatile uint16_t counts = HAL_ADC_GetValue(&AdcHandle);
+	volatile uint16_t counts = HAL_ADC_GetValue(&tempAdcHandle);
 
     static const float VREF_MV = 3000.0;
     static const float ADC_MAX_COUNTS = 0xFFF;

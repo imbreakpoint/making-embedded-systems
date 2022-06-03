@@ -1,9 +1,26 @@
+/* Includes ------------------------------------------------------------------*/
 #include "led.h"
 
-// physical pin maps
+/* Global Definitions --------------------------------------------------------*/
+/**
+  * @brief  red led physical pins
+*/
 const LED LED_RED   = {GPIOG, GPIO_PIN_14};
+
+/**
+  * @brief  green led physical pins
+*/
 const LED LED_GREEN = {GPIOG, GPIO_PIN_13};
 
+/* Local Definitions ---------------------------------------------------------*/
+/* Local Functions -----------------------------------------------------------*/
+/* Interrupt Handles ---------------------------------------------------------*/
+/* Global Functions ----------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Initializes specified LED on board
+*/
 void LEDinit(LED led)
 {
     __HAL_RCC_GPIOG_CLK_ENABLE();

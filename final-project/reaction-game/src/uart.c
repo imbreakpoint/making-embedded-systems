@@ -1,52 +1,62 @@
+/* Includes ------------------------------------------------------------------*/
 #include "uart.h"
 
-//
-static UART_HandleTypeDef sHandleUSART1;
+/* Global Definitions --------------------------------------------------------*/
+/* Local Definitions ---------------------------------------------------------*/
+/**
+  * @brief  USART Handle
+*/
+static UART_HandleTypeDef uartHandleUSART1;
 
-//
+/**
+  * @brief  Sets to true if new byte id
+*/
+static volatile bool uartIsReceived = false; 
+
+/**
+  * @brief  Store received byte
+*/
+static uint8_t uartRxByte;
+
+/**
+  * @brief  USART Baud rate
+*/
 #define BAUD_RATE (115200)
 
-static volatile bool isReceived = false; 
+/* Local Functions -----------------------------------------------------------*/
 
-static uint8_t byte;
+/* Interrupt Handles ---------------------------------------------------------*/
 
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  IRQ for USART
+*/
 void USART1_IRQHandler(void)
 {
-    HAL_UART_IRQHandler(&sHandleUSART1);
+    HAL_UART_IRQHandler(&uartHandleUSART1);
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Callback for receive USART interrupt
+*/
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART1)
     {
-        HAL_UART_Receive_IT(&sHandleUSART1, &byte, 1);
+        HAL_UART_Receive_IT(&uartHandleUSART1, &uartRxByte, 1);
 
-        isReceived = true;
+        uartIsReceived = true;
     }
 }
 
-void UARTsendByte(uint8_t* byte)
-{
-    HAL_UART_Transmit(&sHandleUSART1, byte, 1, 10);    
-}
+/* Global Functions ----------------------------------------------------------*/
 
-bool UARTisReady()
-{
-    return isReceived;
-}
-
-uint8_t UARTgetByte()
-{
-    isReceived = false;
-    return byte;
-}
-
-void UARTreceiveByte()
-{
-    HAL_UART_Receive_IT(&sHandleUSART1, &byte, 1);
-}
-
-void UARTinit()
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Initializes USART
+*/
+void UARTinit(void)
 {
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_USART1_CLK_ENABLE();
@@ -61,16 +71,53 @@ void UARTinit()
   
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    sHandleUSART1.Instance = USART1;
-    sHandleUSART1.Init.BaudRate = BAUD_RATE;
-    sHandleUSART1.Init.WordLength = UART_WORDLENGTH_8B;
-    sHandleUSART1.Init.StopBits = UART_STOPBITS_1;
-    sHandleUSART1.Init.Parity = UART_PARITY_NONE;
-    sHandleUSART1.Init.Mode = UART_MODE_TX_RX;
-    sHandleUSART1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    sHandleUSART1.Init.OverSampling = UART_OVERSAMPLING_16;
+    uartHandleUSART1.Instance = USART1;
+    uartHandleUSART1.Init.BaudRate = BAUD_RATE;
+    uartHandleUSART1.Init.WordLength = UART_WORDLENGTH_8B;
+    uartHandleUSART1.Init.StopBits = UART_STOPBITS_1;
+    uartHandleUSART1.Init.Parity = UART_PARITY_NONE;
+    uartHandleUSART1.Init.Mode = UART_MODE_TX_RX;
+    uartHandleUSART1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    uartHandleUSART1.Init.OverSampling = UART_OVERSAMPLING_16;
 
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
-    HAL_UART_Init(&sHandleUSART1);
+    HAL_UART_Init(&uartHandleUSART1);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  receives byte
+*/
+void UARTreceiveByte(void)
+{
+    HAL_UART_Receive_IT(&uartHandleUSART1, &uartRxByte, 1);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Checks if new byte in buffer
+*/
+bool UARTisReady(void)
+{
+    return uartIsReceived;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Reads one byte of data
+*/
+uint8_t UARTgetByte(void)
+{
+    uartIsReceived = false;
+    return uartRxByte;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Sends one byte of date
+*/
+void UARTsendByte(uint8_t* byte)
+{
+    HAL_UART_Transmit(&uartHandleUSART1, byte, 1, 10);    
 }

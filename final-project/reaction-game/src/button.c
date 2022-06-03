@@ -1,23 +1,51 @@
+/* Includes ------------------------------------------------------------------*/
 #include "button.h"
 #include "led.h"
 
+/* Global Definitions --------------------------------------------------------*/
+/**
+  * @brief  user button physical pins
+*/
 const BTN BTN_USER = {GPIOA, GPIO_PIN_0};
 
+/* Local Definitions ---------------------------------------------------------*/
+/**
+  * @brief  flag to indicate if button press event registered
+*/
 static volatile bool btnPressedEvt = false;
 
+/* Local Functions -----------------------------------------------------------*/
+
+/* Interrupt Handles ---------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  IRQ Handler
+*/
 void EXTI0_IRQHandler(void)
 {
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Interrupt handler callback
+*/
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	// TODO disable interrupt?
     if (BTN_USER.pin == GPIO_Pin)
     {
         btnPressedEvt = true;
     }
 }
 
+/* Global Functions ----------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Initializes specified button on board
+*/
 void BTNinit(BTN btn)
 {
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -31,12 +59,20 @@ void BTNinit(BTN btn)
   	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
-bool BTNisBtnPressed()
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Returns if the button is pressed
+*/
+bool BTNisBtnPressed(void)
 {
 	return btnPressedEvt;
 }
 
-void BTNprocessBtnEvt()
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Processes the button event
+*/
+void BTNprocessBtnEvt(void)
 {
 	btnPressedEvt = false;
 }
