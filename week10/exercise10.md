@@ -11,3 +11,7 @@ What bothers me though is if I connect the meter in series with power supply to 
 and this offset of about ~30mA or so between 'on' and 'sleep' mode is consistent with what is measured directly at the processor pins. 
 <br/>
 But what I haven't been able to figure out is what the rest of the 100mA is all about..Need to look at what other things are actively running ?
+
+<br>
+<br>
+I suspect it is the display, but I do not know if there is a way to prevent that on the dev kit..
