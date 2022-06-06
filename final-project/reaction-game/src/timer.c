@@ -1,6 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "timer.h"
-
+#include "led.h"
 /* Global Definitions --------------------------------------------------------*/
 /**
   * @brief  timer handle for reaction game led
@@ -13,7 +13,6 @@ TIM_HandleTypeDef tmrRxnLEDHandle;
   * @brief  gets set to true if reaction led timer is expired
 */
 static volatile bool tmrIsRxnTmrExpired = false;
-
 /* Local Functions -----------------------------------------------------------*/
 /* Interrupt Handles ---------------------------------------------------------*/
 
@@ -35,7 +34,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
     // TODO disable interrupt?
     if (TMRisRxnLEDHandle(htim))
     {
-        tmrIsRxnTmrExpired = true;
+		if (HAL_TIM_CHANNEL_STATE_RESET != HAL_TIM_GetChannelState(htim, TIM_CHANNEL_ALL))
+		{
+			tmrIsRxnTmrExpired = true;
+		}
     }
 }
 
@@ -47,17 +49,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 */
 void TMRinit(TIM_HandleTypeDef* hTimer)
 {
-	// PS = 8000, Period = 500, gives about, 16e6 / ((8000-1) * (500-1)) = 1Hz
 	hTimer->Instance = TIM1;
 	__TIM1_CLK_ENABLE();
-	hTimer->Init.Prescaler = 8000;
+	hTimer->Init.Prescaler = 32000;
 	hTimer->Init.CounterMode = TIM_COUNTERMODE_UP;
-	hTimer->Init.Period = 2000;
-	hTimer->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	hTimer->Init.Period = 60000;
+	hTimer->Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
 	hTimer->Init.RepetitionCounter = 0;
 	HAL_TIM_Base_Init(hTimer);
 
   	HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);    
+
+	tmrIsRxnTmrExpired = false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -67,6 +70,7 @@ void TMRinit(TIM_HandleTypeDef* hTimer)
 void TMRstart(TIM_HandleTypeDef* hTimer)
 {
     HAL_TIM_Base_Start_IT(hTimer);
+	tmrIsRxnTmrExpired = false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -76,6 +80,7 @@ void TMRstart(TIM_HandleTypeDef* hTimer)
 void TMRstop(TIM_HandleTypeDef* hTimer)
 {
     HAL_TIM_Base_Stop_IT(hTimer);
+	tmrIsRxnTmrExpired = false;
 }
 
 /*----------------------------------------------------------------------------*/

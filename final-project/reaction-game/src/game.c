@@ -1,5 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "button.h"
+#include "display.h"
 #include "game.h"
 #include "led.h"
 #include "temperature.h"
@@ -21,14 +22,14 @@
 /**
   * @brief  Game state
 */
-static GSTATE gameState = GSTATE_NONE;
+static GAME_STATE gameState = GAME_STATE_NONE;
 
 /**
   * @brief  Picks the roatation direction
   * @param  None
-  * @retval GSTATE game state direction
+  * @retval GAME_STATE game state direction
 */
-static GSTATE gameChooseRotation(void);
+static GAME_STATE gameChooseRotation(void);
 
 /* Local Functions -----------------------------------------------------------*/
 
@@ -36,16 +37,16 @@ static GSTATE gameChooseRotation(void);
 /**
   * @brief  Picks the roatation direction
 */
-static GSTATE gameChooseRotation(void)
+static GAME_STATE gameChooseRotation(void)
 {
-	GSTATE directionState = GSTATE_SETUP_CW;
+	GAME_STATE directionState = GAME_STATE_SETUP_CW;
 	// TODO enhance this direction select logic - do something w/ raw values?
 	static float prevTemp = 0.0;
 	float temp = 0.0;
 	TEMPread(&temp);
 	if (temp > prevTemp)
 	{
-		directionState = GSTATE_SETUP_ACW;
+		directionState = GAME_STATE_SETUP_ACW;
 	}
 
 	prevTemp = temp;
@@ -53,9 +54,7 @@ static GSTATE gameChooseRotation(void)
 	return directionState;
 }
 
-
 /* Interrupt Handles ---------------------------------------------------------*/
-
 /* Global Functions ----------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
@@ -67,8 +66,9 @@ void GAMEinit(void)
     TMRstop(&tmrRxnLEDHandle);
     LEDoff(LED_CW);
     LEDoff(LED_ACW);
-    gameState = GSTATE_WAITING_START;
-	// Message - press button to start
+    gameState = GAME_STATE_WAITING_START;
+
+	DISPshowMsg(DISP_MSG_PRESS_BTN);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -79,43 +79,44 @@ void GAMErun(void)
 {
 	switch (gameState)
 	{
-	case GSTATE_WAITING_START:
+	case GAME_STATE_WAITING_START:
 		if (BTNisBtnPressed())
 		{
-			gameState = GSTATE_SELECT_DIRECTION;
+			gameState = GAME_STATE_SELECT_DIRECTION;
 			BTNprocessBtnEvt();
 		}
 		break;
-	case GSTATE_SELECT_DIRECTION:
+	case GAME_STATE_SELECT_DIRECTION:
 		// run algo
 		gameState = gameChooseRotation();
-		// Screnn erase message and show running?
+		DISPshowMsg(DISP_MSG_RUNNING);
 		break;
-	case GSTATE_SETUP_CW:
+	case GAME_STATE_SETUP_CW:
 		TMRstart(&tmrRxnLEDHandle);
 		LEDon(LED_CW);
-		gameState = GSTATE_WAITING_CW;
+		gameState = GAME_STATE_WAITING_CW;
 		// keep track of gyro co-ordinates to compare later
 		break;
-	case GSTATE_SETUP_ACW:
+	case GAME_STATE_SETUP_ACW:
 		TMRstart(&tmrRxnLEDHandle);
 		LEDon(LED_ACW);
-		gameState = GSTATE_WAITING_ACW;
+		gameState = GAME_STATE_WAITING_ACW;
 		break;
-	case GSTATE_WAITING_CW:
-	case GSTATE_WAITING_ACW:
+	case GAME_STATE_WAITING_CW:
+	case GAME_STATE_WAITING_ACW:
 		// TODO show seconds remaining
 		if (TMRisRxnLEDTimedOut())
 		{
-			gameState = GSTATE_OVER; 
+			gameState = GAME_STATE_OVER; 
 		}
-		else
-		{
-			// check if gyro co-ordinates are correct before doing this
-			gameState = GSTATE_SELECT_DIRECTION;
-		}
+		// else
+		// {
+		// 	// check if gyro co-ordinates are correct before doing this
+		// 	gameState = GAME_STATE_SELECT_DIRECTION;
+		// }
 		break;
-	case GSTATE_OVER:
+	case GAME_STATE_OVER:
+		DISPshowMsg(DISP_MSG_GAME_OVER);
 		GAMEinit();
 		break;
 	default:
@@ -127,7 +128,7 @@ void GAMErun(void)
 /**
   * @brief  Sets the game to a specified state
 */
-void GAMEsetState(GSTATE state)
+void GAMEsetState(GAME_STATE state)
 {
     gameState = state;
 }

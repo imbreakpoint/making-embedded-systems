@@ -11,6 +11,18 @@
 /* Global Types --------------------------------------------------------------*/
 
 /* Global Defines ------------------------------------------------------------*/
+/**
+  * @brief  Message enumeration
+*/
+typedef enum
+{
+    DISP_MSG_PRESS_BTN,                 /*!< Message waiting for button press */
+    DISP_MSG_RUNNING,                   /*!< Message runnig */
+    DISP_MSG_GAME_OVER,                 /*!< Message game over */
+    DISP_MSG_TIME_LEFT,                 /*!< Time remaining */
+
+    DISP_MSG_NONE					    /*!< Default message - no action */
+} DISP_MSG;
 
 /* Global Macros -------------------------------------------------------------*/
 
@@ -21,5 +33,12 @@
   * @retval None
 */
 void DISPinit(void);
+
+/**
+  * @brief  Displays a message on screen
+  * @param  msg message string to show
+  * @retval None
+*/
+void DISPshowMsg(DISP_MSG msgID);
 
 #endif
