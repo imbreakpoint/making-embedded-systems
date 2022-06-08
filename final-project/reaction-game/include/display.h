@@ -3,9 +3,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "fonts.h"
-#include "stm32f429i_discovery_lcd.h"
-
 #include "utils.h"
 
 /* Global Types --------------------------------------------------------------*/
@@ -20,6 +17,8 @@ typedef enum
     DISP_MSG_RUNNING,                   /*!< Message runnig */
     DISP_MSG_GAME_OVER,                 /*!< Message game over */
     DISP_MSG_TIME_LEFT,                 /*!< Time remaining */
+    DISP_MSG_ROT_CW,                    /*!< Rotate CW msg */
+    DISP_MSG_ROT_ACW,                   /*!< Rotate ACW msg */
 
     DISP_MSG_NONE					    /*!< Default message - no action */
 } DISP_MSG;

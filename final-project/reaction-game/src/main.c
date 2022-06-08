@@ -8,6 +8,7 @@
 #include "button.h"
 #include "display.h"
 #include "game.h"
+#include "gyroscope.h"
 #include "led.h"
 #include "system.h"
 #include "temperature.h"
@@ -41,7 +42,10 @@ int main(void)
 
 	DISPinit();
 
-	// Applications and library inits
+	GYROinit();
+	GYROcalibrate();
+
+	// // Applications and library inits
 	ConsoleInit();
 	
 	GAMEinit();

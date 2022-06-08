@@ -94,12 +94,14 @@ void GAMErun(void)
 	case GAME_STATE_SETUP_CW:
 		TMRstart(&tmrRxnLEDHandle);
 		LEDon(LED_CW);
+		DISPshowMsg(DISP_MSG_ROT_CW);
 		gameState = GAME_STATE_WAITING_CW;
 		// keep track of gyro co-ordinates to compare later
 		break;
 	case GAME_STATE_SETUP_ACW:
 		TMRstart(&tmrRxnLEDHandle);
 		LEDon(LED_ACW);
+		DISPshowMsg(DISP_MSG_ROT_ACW);
 		gameState = GAME_STATE_WAITING_ACW;
 		break;
 	case GAME_STATE_WAITING_CW:
