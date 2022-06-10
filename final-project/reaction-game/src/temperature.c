@@ -31,7 +31,7 @@ void TEMPinit(void)
 	if (HAL_ADC_STATE_RESET == HAL_ADC_GetState(&tempAdcHandle))
 	{
 		__HAL_RCC_ADC1_CLK_ENABLE();
-    
+  
 		tempAdcHandle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
 		tempAdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
 		tempAdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
@@ -60,7 +60,6 @@ void TEMPinit(void)
 /**
   * @brief  Reads the value of temperature sensor
 */
-__attribute__((optimize(0)))
 HAL_StatusTypeDef TEMPread(float* temperature)
 {
 	if (HAL_OK != HAL_ADC_Start(&tempAdcHandle))

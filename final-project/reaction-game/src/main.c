@@ -10,6 +10,7 @@
 #include "game.h"
 #include "gyroscope.h"
 #include "led.h"
+#include "moving_average_filter.h"
 #include "system.h"
 #include "temperature.h"
 #include "timer.h"
@@ -31,7 +32,7 @@ int main(void)
 	BTNinit(BTN_USER);
 
 	// peripheral inits
-	TMRinit(&tmrRxnLEDHandle);
+	TMRinit();
 
 	UARTinit();
 
@@ -45,9 +46,11 @@ int main(void)
 	GYROinit();
 	GYROcalibrate();
 
-	// // Applications and library inits
+	// Applications and library inits
 	ConsoleInit();
-	
+
+	MAFinit();
+
 	GAMEinit();
 
 	while (1)

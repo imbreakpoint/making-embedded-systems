@@ -5,10 +5,6 @@
 #include "utils.h"
 
 /* Global Types --------------------------------------------------------------*/
-/**
-  * @brief  Timer handle
-*/
-extern TIM_HandleTypeDef tmrRxnLEDHandle;
 
 /* Global Defines ------------------------------------------------------------*/
 /* Global Macros -------------------------------------------------------------*/
@@ -16,31 +12,24 @@ extern TIM_HandleTypeDef tmrRxnLEDHandle;
 /* Global Functions ----------------------------------------------------------*/
 /**
   * @brief  Initializes timer handle
-  * @param  hTimer timer handle
+  * @param  None
   * @retval None
 */
-void TMRinit(TIM_HandleTypeDef* hTimer);
+void TMRinit(void);
 
 /**
   * @brief  Starts the timer
-  * @param  hTimer timer handle
+  * @param  timeout in seconds
   * @retval None
 */
-void TMRstart(TIM_HandleTypeDef* hTimer);
+void TMRstart(uint32_t timeout);
 
 /**
   * @brief  Stops the timer
-  * @param  hTimer timer handle
+  * @param  None
   * @retval None
 */
-void TMRstop(TIM_HandleTypeDef* hTimer);
-
-/**
-  * @brief  Check if this is reaction timer handle
-  * @param  hTimer name of timer handle
-  * @retval true if this matches the reaction led handle
-*/
-bool TMRisRxnLEDHandle(TIM_HandleTypeDef* hTimer);
+void TMRstop(void);
 
 /**
   * @brief  Initializes specified LED on board
@@ -48,5 +37,13 @@ bool TMRisRxnLEDHandle(TIM_HandleTypeDef* hTimer);
   * @retval true if the reaction led timer has expired
 */
 bool TMRisRxnLEDTimedOut(void);
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Get seconds left until timer expires
+  * @param  None
+  * @retval seconds remaining
+*/
+uint32_t TMRsecsUntilTimeout(void);
 
 #endif

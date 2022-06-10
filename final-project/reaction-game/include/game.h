@@ -18,7 +18,7 @@ typedef enum
 	GAME_STATE_WAITING_ACW,			/*!< Wait for anti-clockwise command */
 	GAME_STATE_OVER,				/*!< Done state */
 
-    GAME_STATE_NONE					/*!< Default state - no action */
+	GAME_STATE_NONE					/*!< Default state - no action */
 } GAME_STATE;
 
 /* Global Macros -------------------------------------------------------------*/

@@ -13,14 +13,14 @@
 */
 typedef enum
 {
-    DISP_MSG_PRESS_BTN,                 /*!< Message waiting for button press */
-    DISP_MSG_RUNNING,                   /*!< Message runnig */
-    DISP_MSG_GAME_OVER,                 /*!< Message game over */
-    DISP_MSG_TIME_LEFT,                 /*!< Time remaining */
-    DISP_MSG_ROT_CW,                    /*!< Rotate CW msg */
-    DISP_MSG_ROT_ACW,                   /*!< Rotate ACW msg */
+	DISP_MSG_PRESS_BTN,                 /*!< Message waiting for button press */
+	DISP_MSG_RUNNING,                   /*!< Message runnig */
+	DISP_MSG_GAME_OVER,                 /*!< Message game over */
+	DISP_MSG_TIME_LEFT,                 /*!< Time remaining */
+	DISP_MSG_ROT_CW,                    /*!< Rotate CW msg */
+	DISP_MSG_ROT_ACW,                   /*!< Rotate ACW msg */
 
-    DISP_MSG_NONE					    /*!< Default message - no action */
+	DISP_MSG_NONE					    /*!< Default message - no action */
 } DISP_MSG;
 
 /* Global Macros -------------------------------------------------------------*/

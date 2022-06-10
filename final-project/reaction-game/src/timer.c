@@ -5,14 +5,15 @@
 /**
   * @brief  timer handle for reaction game led
 */
-TIM_HandleTypeDef tmrRxnLEDHandle;
+static TIM_HandleTypeDef tmrRxnLEDHandle;
 
 /* Local Definitions ---------------------------------------------------------*/
 
 /**
-  * @brief  gets set to true if reaction led timer is expired
+  * @brief  gets set to 0 if reaction led timer is expired
 */
-static volatile bool tmrIsRxnTmrExpired = false;
+static uint32_t tmrTickOnIrq = 0;
+
 /* Local Functions -----------------------------------------------------------*/
 /* Interrupt Handles ---------------------------------------------------------*/
 
@@ -20,9 +21,9 @@ static volatile bool tmrIsRxnTmrExpired = false;
 /**
   * @brief  IRQ handle
 */
-void TIM1_UP_TIM10_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
-    HAL_TIM_IRQHandler(&tmrRxnLEDHandle);
+	HAL_TIM_IRQHandler(&tmrRxnLEDHandle);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -31,14 +32,11 @@ void TIM1_UP_TIM10_IRQHandler(void)
 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-    // TODO disable interrupt?
-    if (TMRisRxnLEDHandle(htim))
-    {
-		if (HAL_TIM_CHANNEL_STATE_RESET != HAL_TIM_GetChannelState(htim, TIM_CHANNEL_ALL))
-		{
-			tmrIsRxnTmrExpired = true;
-		}
-    }
+	// TODO disable interrupt?
+	if ((&tmrRxnLEDHandle == htim) && tmrTickOnIrq)
+	{
+		tmrTickOnIrq--;
+	}
 }
 
 /* Global Functions ----------------------------------------------------------*/
@@ -47,56 +45,64 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 /**
   * @brief  Initializes timer handle
 */
-void TMRinit(TIM_HandleTypeDef* hTimer)
+void TMRinit()
 {
-	hTimer->Instance = TIM1;
-	__TIM1_CLK_ENABLE();
-	hTimer->Init.Prescaler = 32000;
-	hTimer->Init.CounterMode = TIM_COUNTERMODE_UP;
-	hTimer->Init.Period = 60000;
-	hTimer->Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
-	hTimer->Init.RepetitionCounter = 0;
-	HAL_TIM_Base_Init(hTimer);
+	__TIM3_CLK_ENABLE();
+	HAL_NVIC_SetPriority(TIM3_IRQn, 0, 1);
+  	HAL_NVIC_EnableIRQ(TIM3_IRQn);
 
-  	HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);    
+	tmrRxnLEDHandle.Instance = TIM3;
+	tmrRxnLEDHandle.Init.Prescaler = (uint32_t) ((SystemCoreClock /2) / 10000) - 1;
+	tmrRxnLEDHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
+	tmrRxnLEDHandle.Init.Period = 10000 - 1;
+	tmrRxnLEDHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
+	tmrRxnLEDHandle.Init.RepetitionCounter = 0;
 
-	tmrIsRxnTmrExpired = false;
+	if (HAL_OK != HAL_TIM_Base_Init(&tmrRxnLEDHandle))
+	{
+		// TODO
+	}
+
+	if (HAL_OK != HAL_TIM_Base_Start_IT(&tmrRxnLEDHandle))
+	{
+		// TODO
+	}
+
+	tmrTickOnIrq = 0;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
   * @brief  Starts the timer
 */
-void TMRstart(TIM_HandleTypeDef* hTimer)
+void TMRstart(uint32_t timeout)
 {
-    HAL_TIM_Base_Start_IT(hTimer);
-	tmrIsRxnTmrExpired = false;
+	tmrTickOnIrq = timeout;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
   * @brief  Stops the timer
 */
-void TMRstop(TIM_HandleTypeDef* hTimer)
+void TMRstop(void)
 {
-    HAL_TIM_Base_Stop_IT(hTimer);
-	tmrIsRxnTmrExpired = false;
+	tmrTickOnIrq = 0;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-  * @brief  Check if this is reaction timer handle
-*/
-bool TMRisRxnLEDHandle(TIM_HandleTypeDef* hTimer)
-{
-    return (&tmrRxnLEDHandle == hTimer);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-  * @brief  Initializes specified LED on board
+  * @brief  Return true if timed out
 */
 bool TMRisRxnLEDTimedOut(void)
 {
-	return tmrIsRxnTmrExpired;
+	return (0 == tmrTickOnIrq);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+  * @brief  Get seconds left until timer expires
+*/
+uint32_t TMRsecsUntilTimeout(void)
+{
+	return tmrTickOnIrq;
 }

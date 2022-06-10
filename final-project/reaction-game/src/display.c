@@ -46,7 +46,7 @@ typedef struct
 */
 static const dispMsgInfo dispMsgTable[] =
 {
-	{	DISP_GAME_INSTRUCT_LN2, 	"Push button to begin"	},
+	{	DISP_GAME_INSTRUCT_LN2, 	"Push button to start"	},
 	{	DISP_GAME_INSTRUCT_LN2, 	"Running..."			},
 	{	DISP_GAME_INSTRUCT_LN1, 	"Game Over!"			},
 	{	DISP_GAME_TIME_LEFT, 		"Seconds left:"			},
@@ -74,7 +74,7 @@ void DISPinit(void)
 	BSP_LCD_SetFont(&Font16);
 
 	// TOOD remove this debug stuff
-	BSP_LCD_DisplayStringAtLine(5, (uint8_t*)"Hope this works!");
+	BSP_LCD_DisplayStringAtLine(5, (uint8_t*)"There ain't any time!");
 }
 
 /**
