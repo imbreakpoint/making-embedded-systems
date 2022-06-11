@@ -56,11 +56,11 @@ static void gyroGetXYZ(GYRO_DATA* data);
 */
 typedef enum
 {
-	GYRO_STATUS_INIT,
-	GYRO_STATUS_CAL_IN_PROGRESS,
-	GYRO_STATUS_CAL_DONE,
+    GYRO_STATUS_INIT,
+    GYRO_STATUS_CAL_IN_PROGRESS,
+    GYRO_STATUS_CAL_DONE,
 
-	GYRO_STATUS_UNKNOWN
+    GYRO_STATUS_UNKNOWN
 } GYRO_STATUS;
 
 /**
@@ -81,11 +81,11 @@ static GYRO_STATUS gyroStatus = GYRO_STATUS_UNKNOWN;
 */
 static void gyroGetXYZ(GYRO_DATA* data)
 {
-	float xyz[GYRO_NUM_COORDINATES] = {0};
-	BSP_GYRO_GetXYZ(xyz);
-	data->x = xyz[GYRO_COOR_X];
-	data->y = xyz[GYRO_COOR_Y];
-	data->z = xyz[GYRO_COOR_Z];
+    float xyz[GYRO_NUM_COORDINATES] = {0};
+    BSP_GYRO_GetXYZ(xyz);
+    data->x = xyz[GYRO_COOR_X];
+    data->y = xyz[GYRO_COOR_Y];
+    data->z = xyz[GYRO_COOR_Z];
 }
 
 /* Interrupt Handles ---------------------------------------------------------*/
@@ -97,9 +97,9 @@ static void gyroGetXYZ(GYRO_DATA* data)
 */
 void GYROinit(void)
 {
-	gyroStatus = GYRO_STATUS_INIT;
-	BSP_GYRO_Init();
-	HAL_Delay(GYRO_BOOT_DELAY_MS);
+    gyroStatus = GYRO_STATUS_INIT;
+    BSP_GYRO_Init();
+    HAL_Delay(GYRO_BOOT_DELAY_MS);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -108,44 +108,44 @@ void GYROinit(void)
 */
 void GYROcalibrate(void)
 {
-	gyroStatus = GYRO_STATUS_CAL_IN_PROGRESS;
+    gyroStatus = GYRO_STATUS_CAL_IN_PROGRESS;
 
-	GYRO_DATA calBuffer[1] = { 0 };
-	GYRO_DATA sum = { 0 };
+    GYRO_DATA data = { 0 };
+    GYRO_DATA sum = { 0 };
 
-	for (uint16_t i = 0; i < GYRO_NUM_CAL_SAMPLES; i++)
-	{
-		gyroGetXYZ(&calBuffer[0]);
+    for (uint16_t i = 0; i < GYRO_NUM_CAL_SAMPLES; i++)
+    {
+        gyroGetXYZ(&data);
 
-		sum.x += calBuffer[0].x;
-		sum.y += calBuffer[0].y;
-		sum.z += calBuffer[0].z;
+        sum.x += data.x;
+        sum.y += data.y;
+        sum.z += data.z;
 
-		HAL_Delay(GYRO_CAL_DELAY_MS);
-	}
+        HAL_Delay(GYRO_CAL_DELAY_MS);
+    }
 
-	gyroNoise.x = sum.x / GYRO_NUM_CAL_SAMPLES;
-	gyroNoise.y = sum.y / GYRO_NUM_CAL_SAMPLES;
-	gyroNoise.z = sum.z / GYRO_NUM_CAL_SAMPLES;
+    gyroNoise.x = sum.x / GYRO_NUM_CAL_SAMPLES;
+    gyroNoise.y = sum.y / GYRO_NUM_CAL_SAMPLES;
+    gyroNoise.z = sum.z / GYRO_NUM_CAL_SAMPLES;
 
-	gyroStatus = GYRO_STATUS_CAL_DONE;
+    gyroStatus = GYRO_STATUS_CAL_DONE;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
   * @brief  Reads the current coordinates
 */
-bool GYROread(GYRO_DATA* data)
+bool GYROread(GYRO_DATA *pData)
 {
-	bool status = false;
-	if (gyroStatus == GYRO_STATUS_CAL_DONE)
-	{
-		gyroGetXYZ(data);
-		data->x -= gyroNoise.x;
-		data->y -= gyroNoise.y;
-		data->z -= gyroNoise.z;
-		status = true;
-	}
+    bool status = false;
+    if (gyroStatus == GYRO_STATUS_CAL_DONE)
+    {
+        gyroGetXYZ(pData);
+        pData->x -= gyroNoise.x;
+        pData->y -= gyroNoise.y;
+        pData->z -= gyroNoise.z;
+        status = true;
+    }
 
-	return status;
+    return status;
 }

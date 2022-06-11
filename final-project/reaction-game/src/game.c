@@ -1,6 +1,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include <math.h>
 
+#include "stm32f429i_discovery_lcd.h"
+
 #include "button.h"
 #include "display.h"
 #include "game.h"
@@ -11,7 +13,6 @@
 #include "timer.h"
 // #define DBG_GAME
 #ifdef DBG_GAME
-#include "stm32f429i_discovery_lcd.h"
 #include <stdio.h>
 #endif
 
@@ -39,20 +40,62 @@
 #define GAME_IDLE_TIME_MSECS (1000)
 
 /**
+  * @brief  Gyro tolerance
+*/
+#define GAME_Y_TOL (2.0)
+
+/**
   * @brief  Game direction
 */
 typedef enum
 {
-    GAME_DIR_CW,
-    GAME_DIR_ACW,
+    GAME_DIR_CW,	/*!< Direction CW */
+    GAME_DIR_ACW,	/*!< Direction ACW */
 
-    GAME_DIR_NONE
+    GAME_DIR_NONE	/*!< Default direction - no action */
 } GAME_DIR;
+
+/**
+  * @brief  Game data
+*/
+typedef struct
+{
+    GAME_STATE state;		/*!< Game state */
+    uint32_t score;			/*!< Score */
+    uint32_t secsRemaining;	/*!< Time left to take action */
+} GAME_INFO;
+
+/**
+  * @brief  Game Screens
+*/
+static DISP_SCREEN dispScrRunning =
+{ 
+    {DISP_MSG_RUNNING, DISP_MSG_NONE},
+    LCD_COLOR_LIGHTGRAY
+};
+
+static DISP_SCREEN dispScrCW =
+{
+    {DISP_MSG_ROT_CW, DISP_MSG_CW_DIR, DISP_MSG_NONE},
+    LCD_COLOR_GREEN
+};
+
+static DISP_SCREEN dispScrACW =
+{ 
+    {DISP_MSG_ROT_ACW, DISP_MSG_ACW_DIR, DISP_MSG_NONE},
+    LCD_COLOR_RED
+};
+
+static DISP_SCREEN dispScrOver =
+{ 
+    {DISP_MSG_GAME_OVER, DISP_MSG_NONE},
+    LCD_COLOR_WHITE
+};
 
 /**
   * @brief  Game state
 */
-static GAME_STATE gameState = GAME_STATE_NONE;
+static GAME_INFO gameInfo = { GAME_STATE_NONE, 0, 0 };
 
 /**
   * @brief  Picks the roatation direction
@@ -76,24 +119,25 @@ static GAME_DIR gameReadDirection(void);
 */
 static GAME_STATE gameChooseRotation(void)
 {
-	GAME_STATE directionState = GAME_STATE_SETUP_CW;
-	// TODO enhance this direction select logic - do something w/ raw values?
-	static float prevTemp = 0.0;
-	float temp = 0.0;
-	TEMPread(&temp);
-	if (temp > prevTemp)
-	{
-		directionState = GAME_STATE_SETUP_ACW;
-	}
+    GAME_STATE directionState = GAME_STATE_SETUP_CW;
+    // TODO enhance this direction select logic - do something w/ raw values?
+    static float prevTemp = 0.0;
+    float temp = 0.0;
+    TEMPread(&temp);
+    if (temp > prevTemp)
+    {
+        directionState = GAME_STATE_SETUP_ACW;
+    }
 
-	prevTemp = temp;
-	// #ifdef DBG_GAME
-		char str[20];
-		sprintf(str, "tempersture =%.4f", temp);	
-		BSP_LCD_DisplayStringAtLine(1, (uint8_t*)str);
-// #endif
+    prevTemp = temp;
 
-	return directionState;
+#ifdef DBG_GAME
+        char str[20];
+        sprintf(str, "temperature =%.4f", temp);	
+        BSP_LCD_DisplayStringAtLine(1, (uint8_t*)str);
+#endif
+
+    return directionState;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -102,20 +146,20 @@ static GAME_STATE gameChooseRotation(void)
 */
 static GAME_DIR gameReadDirection(void)
 {
-	GAME_DIR direction = GAME_DIR_NONE;
-	static GYRO_DATA previousResult = { 0 };
+    GAME_DIR direction = GAME_DIR_NONE;
+    static GYRO_DATA previousResult = { 0 };
 
-	// read new value
-	GYRO_DATA newSample = {0};
-	bool status = GYROread(&newSample);
-	// Run it through the filter
-	if (status)
-	{
-		MAFsmooth(newSample);
-	}
+    // read new value
+    GYRO_DATA newSample = {0};
+    const bool status = GYROread(&newSample);
+    // Run it through the filter
+    if (status)
+    {
+        MAFsmooth(newSample);
+    }
 
-	// read the latest result
-	GYRO_DATA result = MAFgetResult();
+    // read the latest result
+    const GYRO_DATA result = MAFgetResult();
 
 #ifdef DBG_GAME
     if ((fabs(result.x - previousResult.x) > 0.3) || 
@@ -132,37 +176,36 @@ static GAME_DIR gameReadDirection(void)
     }
 #endif
 
-	// TODO check events based on tolerance
-    if (fabs(result.y - previousResult.y) > 2.0)
+    if (fabs(result.y - previousResult.y) > GAME_Y_TOL)
     {
         if (result.y < 0.0)
         {
 #ifdef DBG_GAME
-			BSP_LCD_ClearStringLine(15);
-			BSP_LCD_DisplayStringAtLine(15, (uint8_t*)"LEFT");
+            BSP_LCD_ClearStringLine(15);
+            BSP_LCD_DisplayStringAtLine(15, (uint8_t*)"LEFT");
 #endif
-			direction = GAME_DIR_ACW;
+            direction = GAME_DIR_ACW;
         }
         else
         {
 #ifdef DBG_GAME			
-			BSP_LCD_ClearStringLine(15);
-			BSP_LCD_DisplayStringAtLine(15, (uint8_t*)"RIGHT");
+            BSP_LCD_ClearStringLine(15);
+            BSP_LCD_DisplayStringAtLine(15, (uint8_t*)"RIGHT");
 #endif			
-			direction = GAME_DIR_CW;
+            direction = GAME_DIR_CW;
         }
-	
-		MAFinit();
-		previousResult.x = 0.0;
-		previousResult.y = 0.0;
-		previousResult.z = 0.0;
+    
+        MAFinit();
+        previousResult.x = 0.0;
+        previousResult.y = 0.0;
+        previousResult.z = 0.0;
     }
     else
     {
         previousResult = result;   
     }
 
-	return direction;
+    return direction;
 }
 
 /* Interrupt Handles ---------------------------------------------------------*/
@@ -174,12 +217,15 @@ static GAME_DIR gameReadDirection(void)
 */
 void GAMEinit(void)
 {
+    BTNprocessBtnEvt();
+
     TMRstop();
+
     LEDoff(LED_CW);
     LEDoff(LED_ACW);
-    gameState = GAME_STATE_WAITING_START;
 
-	DISPshowMsg(DISP_MSG_PRESS_BTN);
+    gameInfo.score = 0;
+    gameInfo.state = GAME_STATE_WAITING_START;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -188,91 +234,111 @@ void GAMEinit(void)
 */
 void GAMErun(void)
 {	
-	switch (gameState)
-	{
-	case GAME_STATE_WAITING_START:
-		if (BTNisBtnPressed())
-		{
-			gameState = GAME_STATE_SELECT_DIRECTION;
-			BTNprocessBtnEvt();
-		}
-		break;
-	case GAME_STATE_SELECT_DIRECTION:
-		// run algo
-		LEDoff(LED_CW);
-    	LEDoff(LED_ACW);
-		gameState = gameChooseRotation();
-		DISPshowMsg(DISP_MSG_RUNNING);
-		HAL_Delay(GAME_IDLE_TIME_MSECS);
-		break;
-	case GAME_STATE_SETUP_CW:
-		LEDon(LED_CW);
-		DISPshowMsg(DISP_MSG_ROT_CW);
-		gameState = GAME_STATE_WAITING_CW;
-		// TODO Use some algo to make this time dynamic
-		TMRstart(GAME_RXN_TIMEOUT_SECS);
-		break;
-	case GAME_STATE_SETUP_ACW:
-		LEDon(LED_ACW);
-		DISPshowMsg(DISP_MSG_ROT_ACW);
-		gameState = GAME_STATE_WAITING_ACW;
-		// TODO Use some algo to make this time dynamic
-		TMRstart(GAME_RXN_TIMEOUT_SECS);
-		break;
-	case GAME_STATE_WAITING_CW:
-	{
+    switch (gameInfo.state)
+    {
+    case GAME_STATE_WAITING_START:
+        DISPshowMsg(DISP_MSG_PRESS_BTN);
+        if (BTNisBtnPressed())
+        {
+            gameInfo.state = GAME_STATE_SELECT_DIRECTION;
+            BTNprocessBtnEvt();
+        }
+        break;
+    case GAME_STATE_SELECT_DIRECTION:
+        // run algo
+        LEDoff(LED_CW);
+        LEDoff(LED_ACW);
+        gameInfo.state = gameChooseRotation();
+        DISPupdateScreen(&dispScrRunning);
+        HAL_Delay(GAME_IDLE_TIME_MSECS);
+        break;
+    case GAME_STATE_SETUP_CW:
+        LEDon(LED_CW);
+        DISPupdateScreen(&dispScrCW);
+        gameInfo.state = GAME_STATE_WAITING_CW;
+        // TODO Use some algo to make this time dynamic
+        TMRstart(GAME_RXN_TIMEOUT_SECS);
+        DISPupdate32(DISP_MSG_SCORE, gameInfo.score);
+        break;
+    case GAME_STATE_SETUP_ACW:
+        LEDon(LED_ACW);
+        DISPupdateScreen(&dispScrACW);
+        gameInfo.state = GAME_STATE_WAITING_ACW;
+        // TODO Use some algo to make this time dynamic
+        TMRstart(GAME_RXN_TIMEOUT_SECS);
+        DISPupdate32(DISP_MSG_SCORE, gameInfo.score);
+        break;
+    case GAME_STATE_WAITING_CW:
+    {
 #ifdef DBG_GAME
-		char str[20];
-		sprintf(str, "secs left=%ld", TMRsecsUntilTimeout());	
-		BSP_LCD_DisplayStringAtLine(2, (uint8_t*)str);
+        char str[20];
+        sprintf(str, "secs left=%ld", TMRsecsUntilTimeout());	
+        BSP_LCD_DisplayStringAtLine(2, (uint8_t*)str);
 #endif
-		const GAME_DIR direction = gameReadDirection();
-		// TODO show seconds remaining
-		if (TMRisRxnLEDTimedOut() || (GAME_DIR_ACW == direction))
-		{
-			gameState = GAME_STATE_OVER; 
-		}
-		else if (GAME_DIR_CW == direction)
-		{
-			gameState = GAME_STATE_SELECT_DIRECTION;
-			TMRstop();
-		}
-	}
-		break;
-	case GAME_STATE_WAITING_ACW:
-	{
+        const GAME_DIR direction = gameReadDirection();
+        const uint32_t secs = TMRsecsUntilTimeout();
+        if (gameInfo.secsRemaining != secs)
+        {
+            DISPupdate32(DISP_MSG_TIME_LEFT, secs);
+            gameInfo.secsRemaining = secs;
+        }
+
+        if (TMRisRxnLEDTimedOut() || (GAME_DIR_ACW == direction))
+        {
+            gameInfo.state = GAME_STATE_OVER; 
+        }
+        else if (GAME_DIR_CW == direction)
+        {
+            gameInfo.state = GAME_STATE_SELECT_DIRECTION;
+            TMRstop();
+            gameInfo.score++;
+            DISPupdate32(DISP_MSG_SCORE, gameInfo.score);
+        }
+    }
+        break;
+    case GAME_STATE_WAITING_ACW:
+    {
 #ifdef DBG_GAME		
-		char str[20];
-		sprintf(str, "count=%ld   ", TMRsecsUntilTimeout());	
-		BSP_LCD_DisplayStringAtLine(2, (uint8_t*)str);
+        char str[20];
+        sprintf(str, "count=%ld   ", TMRsecsUntilTimeout());	
+        BSP_LCD_DisplayStringAtLine(2, (uint8_t*)str);
 #endif		
-		const GAME_DIR direction = gameReadDirection();
-		// TODO show seconds remaining
-		if (TMRisRxnLEDTimedOut() || (GAME_DIR_CW == direction))
-		{
-			gameState = GAME_STATE_OVER; 
-		}
-		else if (GAME_DIR_ACW == direction)
-		{
-			gameState = GAME_STATE_SELECT_DIRECTION;
-			TMRstop();
-		}
-	}
-		break;
-	case GAME_STATE_OVER:
-		DISPshowMsg(DISP_MSG_GAME_OVER);
-		GAMEinit();
-		break;
-	default:
-		break;
-	}
+        const GAME_DIR direction = gameReadDirection();
+        const uint32_t secs = TMRsecsUntilTimeout();
+        if (gameInfo.secsRemaining != secs)
+        {
+            DISPupdate32(DISP_MSG_TIME_LEFT, secs);
+            gameInfo.secsRemaining = secs;
+        }
+
+        if (TMRisRxnLEDTimedOut() || (GAME_DIR_CW == direction))
+        {
+            gameInfo.state = GAME_STATE_OVER; 
+        }
+        else if (GAME_DIR_ACW == direction)
+        {
+            gameInfo.state = GAME_STATE_SELECT_DIRECTION;
+            TMRstop();
+            gameInfo.score++;
+            DISPupdate32(DISP_MSG_SCORE, gameInfo.score);
+        }
+    }
+        break;
+    case GAME_STATE_OVER:
+        DISPupdateScreen(&dispScrOver);
+        DISPupdate32(DISP_MSG_LAST_SCORE, gameInfo.score);
+        GAMEinit();
+        break;
+    default:
+        break;
+    }
 }
 
 /*----------------------------------------------------------------------------*/
 /**
   * @brief  Sets the game to a specified state
 */
-void GAMEsetState(GAME_STATE state)
+void GAMEsetState(const GAME_STATE state)
 {
-    gameState = state;
+    gameInfo.state = state;
 }

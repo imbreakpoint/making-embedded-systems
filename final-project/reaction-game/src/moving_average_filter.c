@@ -39,7 +39,7 @@ void MAFinit(void)
 /**
   * @brief  Calculates the new average using the latest sample
 */
-void MAFsmooth(GYRO_DATA sample)
+void MAFsmooth(const GYRO_DATA sample)
 {
 	// remove
 	CB_BUF_DATA oldSample = { 0 };

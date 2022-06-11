@@ -23,7 +23,7 @@ static uint32_t tmrTickOnIrq = 0;
 */
 void TIM3_IRQHandler(void)
 {
-	HAL_TIM_IRQHandler(&tmrRxnLEDHandle);
+    HAL_TIM_IRQHandler(&tmrRxnLEDHandle);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -32,11 +32,11 @@ void TIM3_IRQHandler(void)
 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-	// TODO disable interrupt?
-	if ((&tmrRxnLEDHandle == htim) && tmrTickOnIrq)
-	{
-		tmrTickOnIrq--;
-	}
+    // TODO disable interrupt?
+    if ((&tmrRxnLEDHandle == htim) && tmrTickOnIrq)
+    {
+        tmrTickOnIrq--;
+    }
 }
 
 /* Global Functions ----------------------------------------------------------*/
@@ -47,37 +47,37 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 */
 void TMRinit()
 {
-	__TIM3_CLK_ENABLE();
-	HAL_NVIC_SetPriority(TIM3_IRQn, 0, 1);
-  	HAL_NVIC_EnableIRQ(TIM3_IRQn);
+    __TIM3_CLK_ENABLE();
+    HAL_NVIC_SetPriority(TIM3_IRQn, 0, 1);
+      HAL_NVIC_EnableIRQ(TIM3_IRQn);
 
-	tmrRxnLEDHandle.Instance = TIM3;
-	tmrRxnLEDHandle.Init.Prescaler = (uint32_t) ((SystemCoreClock /2) / 10000) - 1;
-	tmrRxnLEDHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	tmrRxnLEDHandle.Init.Period = 10000 - 1;
-	tmrRxnLEDHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
-	tmrRxnLEDHandle.Init.RepetitionCounter = 0;
+    tmrRxnLEDHandle.Instance = TIM3;
+    tmrRxnLEDHandle.Init.Prescaler = (uint32_t) ((SystemCoreClock / 2) / 10000) - 1;
+    tmrRxnLEDHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
+    tmrRxnLEDHandle.Init.Period = 10000 - 1;
+    tmrRxnLEDHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
+    tmrRxnLEDHandle.Init.RepetitionCounter = 0;
 
-	if (HAL_OK != HAL_TIM_Base_Init(&tmrRxnLEDHandle))
-	{
-		// TODO
-	}
+    if (HAL_OK != HAL_TIM_Base_Init(&tmrRxnLEDHandle))
+    {
+        // TODO
+    }
 
-	if (HAL_OK != HAL_TIM_Base_Start_IT(&tmrRxnLEDHandle))
-	{
-		// TODO
-	}
+    if (HAL_OK != HAL_TIM_Base_Start_IT(&tmrRxnLEDHandle))
+    {
+        // TODO
+    }
 
-	tmrTickOnIrq = 0;
+    tmrTickOnIrq = 0;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
   * @brief  Starts the timer
 */
-void TMRstart(uint32_t timeout)
+void TMRstart(const uint32_t timeout)
 {
-	tmrTickOnIrq = timeout;
+    tmrTickOnIrq = timeout;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -86,7 +86,7 @@ void TMRstart(uint32_t timeout)
 */
 void TMRstop(void)
 {
-	tmrTickOnIrq = 0;
+    tmrTickOnIrq = 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -95,7 +95,7 @@ void TMRstop(void)
 */
 bool TMRisRxnLEDTimedOut(void)
 {
-	return (0 == tmrTickOnIrq);
+    return (0 == tmrTickOnIrq);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -104,5 +104,5 @@ bool TMRisRxnLEDTimedOut(void)
 */
 uint32_t TMRsecsUntilTimeout(void)
 {
-	return tmrTickOnIrq;
+    return tmrTickOnIrq;
 }

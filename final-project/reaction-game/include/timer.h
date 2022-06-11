@@ -22,7 +22,7 @@ void TMRinit(void);
   * @param  timeout in seconds
   * @retval None
 */
-void TMRstart(uint32_t timeout);
+void TMRstart(const uint32_t timeout);
 
 /**
   * @brief  Stops the timer

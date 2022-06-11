@@ -41,6 +41,6 @@ void GYROcalibrate(void);
   * @param  data pointer to store read data
   * @retval true if read is OK, false otherwise
 */
-bool GYROread(GYRO_DATA* data);
+bool GYROread(GYRO_DATA *pData);
 
 #endif

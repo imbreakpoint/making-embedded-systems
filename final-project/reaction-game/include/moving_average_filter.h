@@ -12,23 +12,23 @@
 
 /* Global Functions ----------------------------------------------------------*/
 /**
-	* @brief  Initializes moving average filter
-	* @param  None
-	* @retval None
+    * @brief  Initializes moving average filter
+    * @param  None
+    * @retval None
 */
 void MAFinit(void);
 
 /**
-	* @brief  Calculates the new average using the latest sample
-	* @param  sample new reading
-	* @retval None
+    * @brief  Calculates the new average using the latest sample
+    * @param  sample new reading
+    * @retval None
 */
-void MAFsmooth(GYRO_DATA sample);
+void MAFsmooth(const GYRO_DATA sample);
 
 /**
-	* @brief  Returns the current average value
-	* @param  None
-	* @retval GYRO_DATA resultant average
+    * @brief  Returns the current average value
+    * @param  None
+    * @retval GYRO_DATA resultant average
 */
 GYRO_DATA MAFgetResult(void);
 

@@ -1,5 +1,5 @@
 /*
-	Final Project
+    Final Project
 
 */
 /* Includes ------------------------------------------------------------------*/
@@ -20,51 +20,53 @@
 
 int main(void)
 {
-	// configs
-	HAL_Init();
+    // configs
+    HAL_Init();
 
-	SYSTEMclkInit();
+    SYSTEMclkInit();
 
-	// i/o port inits
+    // i/o port inits
     LEDinit(LED_RED);
     LEDinit(LED_GREEN);
 
-	BTNinit(BTN_USER);
+    BTNinit();
 
-	// peripheral inits
-	TMRinit();
+    // peripheral inits
+    TMRinit();
 
-	UARTinit();
+    UARTinit();
 
-	// TODO is this required?
-  	UARTreceiveByte();
+    // TODO is this required?
+    UARTreceiveByte();
 
-	TEMPinit();
+    TEMPinit();
 
-	DISPinit();
+    DISPinit();
 
-	GYROinit();
-	GYROcalibrate();
+    DISPshowMsg(DISP_MSG_INIT);
 
-	// Applications and library inits
-	ConsoleInit();
+    GYROinit();
+    GYROcalibrate();
 
-	MAFinit();
+    // Applications and library inits
+    ConsoleInit();
 
-	GAMEinit();
+    MAFinit();
 
-	while (1)
-	{
-		// run, run, run, forever..
-		ConsoleProcess();
-		GAMErun();
-	}
+    GAMEinit();
+
+    while (1)
+    {
+        // run, run, run, forever..
+        ConsoleProcess();
+        GAMErun();
+    }
 }
 
 void SysTick_Handler(void)
 {
-	HAL_IncTick();
-  	HAL_SYSTICK_IRQHandler();
+    HAL_IncTick();
+    HAL_SYSTICK_IRQHandler();
 }
 
 // TODO fault handler
