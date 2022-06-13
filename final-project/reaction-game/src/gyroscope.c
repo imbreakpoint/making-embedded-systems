@@ -83,9 +83,9 @@ static void gyroGetXYZ(GYRO_DATA* data)
 {
     float xyz[GYRO_NUM_COORDINATES] = {0};
     BSP_GYRO_GetXYZ(xyz);
-    data->x = xyz[GYRO_COOR_X];
-    data->y = xyz[GYRO_COOR_Y];
-    data->z = xyz[GYRO_COOR_Z];
+    data->x = 0.001 * xyz[GYRO_COOR_X];
+    data->y = 0.001 * xyz[GYRO_COOR_Y];
+    data->z = 0.001 * xyz[GYRO_COOR_Z];
 }
 
 /* Interrupt Handles ---------------------------------------------------------*/
@@ -105,6 +105,7 @@ void GYROinit(void)
 /*----------------------------------------------------------------------------*/
 /**
   * @brief  Calibrates the gyroscope
+  * https://www.elecrow.com/download/TA0343.pdf - cal method
 */
 void GYROcalibrate(void)
 {
